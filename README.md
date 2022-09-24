@@ -1,4 +1,4 @@
-# nvim-search-mode
+# nvim-jump-mode
 
 Modal `next` and `prev` jumping.
 
@@ -7,7 +7,7 @@ between relevant lines. Jumping between snippet fields,
 `vim.diagnostic.goto_next()`, `gitsigns.next_hunk()`, good old builtin vim
 search, etc...
 
-This plugin puts these and more behing a single leader key.
+This plugin puts these behind a single leader key.
 
 ## :rocket: Usage
 
@@ -22,13 +22,13 @@ This plugin puts these and more behing a single leader key.
 ### [packer.nvim](https://github.com/wbthomason/packer.nvim)
 
 ```lua
-use 'rwblokzijl/nvim-search-mode'
+use 'rwblokzijl/nvim-jump-mode'
 ```
 
 ### [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```vim
-Plug 'rwblokzijl/nvim-search-mode'
+Plug 'rwblokzijl/nvim-jump-mode'
 ```
 
 ## :gear: Configuration
@@ -41,8 +41,8 @@ luasnip jumping.
 ```lua
 local ls = require "luasnip"
 
-require('nvim-next-mode').setup({
-  search_modes = {
+require('nvim-jump-mode').setup({
+  jump_modes = {
     lsp_diagnostics = {
       mode_leader = "d", -- gnd/gpd
       next_callback = vim.diagnostic.goto_next,
@@ -75,7 +75,7 @@ require('nvim-next-mode').setup({
 The default configuration is as follows and can be overwritten.
 
 ```lua
-require('nvim-next-mode').setup({
+require('nvim-jump-mode').setup({
   mappings = {
     next = {
       { modes = {'n'}, key = "n" } -- for jumping to the next item in the mode
@@ -90,7 +90,7 @@ require('nvim-next-mode').setup({
       { modes = {'n'}, key = "gp" } -- leader for switching modes and jumping to prev
     },
   },
-  search_modes = { -- buildin search mode is always enabled
+  jump_modes = { -- buildin search mode is always enabled
     search = {
       next_callback = function () vim.cmd 'silent! norm! n' end,
       prev_callback = function () vim.cmd 'silent! norm! N' end,
@@ -114,6 +114,6 @@ nnoremap ? :NextModeReset<CR>?
 ### Show mode on [lualine](https://github.com/nvim-lualine/lualine.nvim)
 
 ```lua
-lualine_x = {require('nvim-next-mode').mode, ...},
+lualine_x = {require('nvim-jump-mode').mode, ...},
 ```
 

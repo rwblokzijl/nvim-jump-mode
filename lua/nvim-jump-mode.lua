@@ -16,7 +16,7 @@ M.setup = function (user_settings)
         { modes = {'n'}, key = "gp" }
       },
     },
-    search_modes ={
+    jump_modes = {
       search = {
         next_callback = function () vim.cmd 'silent! norm! n' end,
         prev_callback = function () vim.cmd 'silent! norm! N' end,
@@ -24,7 +24,7 @@ M.setup = function (user_settings)
     },
     default_mode = "search",
   }
-  local search_mode_default = {
+  local jump_mode_default = {
     mappings = {
       next = {},
       prev = {}
@@ -33,14 +33,14 @@ M.setup = function (user_settings)
   local settings = vim.tbl_deep_extend("force", default_settings, user_settings)
   GN = {
     default_mode = settings.default_mode,
-    search_modes = settings.search_modes,
+    jump_modes = settings.jump_modes,
     active_type  = settings.default_mode,
   }
   function GN:get_type (type_name)
     if type_name == nil then
       type_name = self.active_type
     end
-    local type = vim.tbl_get(self.search_modes, type_name)
+    local type = vim.tbl_get(self.jump_modes, type_name)
     if type == nil then
       error("[GOTO NEXT] ERROR: '" .. type_name .. "' is not a configured type")
     end
@@ -67,20 +67,20 @@ M.setup = function (user_settings)
   for _, mapping in ipairs(settings.mappings.prev) do
     vim.keymap.set(mapping.modes, mapping.key, function()GN:prev()end, {noremap = true, silent = true})
   end
-  for name, search_mode_user in pairs(GN.search_modes) do
-    local search_mode = vim.tbl_deep_extend("force", search_mode_default , search_mode_user)
-    if vim.tbl_get(search_mode, "mode_leader") ~= nil then
+  for name, jump_mode_user in pairs(GN.jump_modes) do
+    local jump_mode = vim.tbl_deep_extend("force", jump_mode_default , jump_mode_user)
+    if vim.tbl_get(jump_mode, "mode_leader") ~= nil then
       for _, leader in ipairs(settings.mappings.leader_next) do
-        vim.keymap.set(leader.modes, leader.key .. search_mode.mode_leader , function()GN:next(name)end, {noremap = true, silent = true})
+        vim.keymap.set(leader.modes, leader.key .. jump_mode.mode_leader , function()GN:next(name)end, {noremap = true, silent = true})
       end
       for _, leader in ipairs(settings.mappings.leader_prev) do
-        vim.keymap.set(leader.modes, leader.key .. search_mode.mode_leader , function()GN:prev(name)end, {noremap = true, silent = true})
+        vim.keymap.set(leader.modes, leader.key .. jump_mode.mode_leader , function()GN:prev(name)end, {noremap = true, silent = true})
       end
     end
-    for _, mapping in ipairs(search_mode.mappings.next) do
+    for _, mapping in ipairs(jump_mode.mappings.next) do
       vim.keymap.set(mapping.modes, mapping.key, function()GN:next(name)end, {noremap = true, silent = true})
     end
-    for _, mapping in ipairs(search_mode.mappings.prev) do
+    for _, mapping in ipairs(jump_mode.mappings.prev) do
       vim.keymap.set(mapping.modes, mapping.key, function()GN:prev(name)end, {noremap = true, silent = true})
     end
   end
