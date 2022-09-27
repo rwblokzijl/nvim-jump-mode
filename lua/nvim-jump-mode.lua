@@ -2,6 +2,8 @@ M = {}
 local GN
 M.setup = function (user_settings)
   local default_settings = {
+    open_fold_on_jump = true,
+    center_line_on_jump = true,
     mappings = {
       next = {
         { modes = {'n'}, key = "n" }
@@ -26,6 +28,7 @@ M.setup = function (user_settings)
   }
   local jump_mode_default = {
     mappings = {
+      pass_history = false,
       next = {},
       prev = {}
     }
@@ -34,30 +37,55 @@ M.setup = function (user_settings)
   GN = {
     default_mode = settings.default_mode,
     jump_modes = settings.jump_modes,
-    active_type  = settings.default_mode,
+    active_mode  = settings.default_mode,
+    history = {}
   }
-  function GN:get_type (type_name)
-    if type_name == nil then
-      type_name = self.active_type
+  function GN:set_active_mode(mode_name)
+    self.active_mode = mode_name
+    self.history = {}
+  end
+  function GN:get_mode (mode_name)
+    local mode = vim.tbl_get(self.jump_modes, mode_name)
+    if mode == nil then
+      error("[GOTO NEXT] ERROR: '" .. mode_name .. "' is not a configured mode")
     end
-    local type = vim.tbl_get(self.jump_modes, type_name)
-    if type == nil then
-      error("[GOTO NEXT] ERROR: '" .. type_name .. "' is not a configured type")
+    return mode
+  end
+  function GN:get_history(mode)
+    if mode.pass_history == true then
+      return self.history
+    else
+      return nil
     end
-    self.active_type = type_name
-    return type
   end
-  function GN:next(type_name)
-    self:get_type(type_name).next_callback()
+  function GN:jump(mode_name, callback_name)
+    if mode_name == nil then
+      mode_name = self.active_mode
+    else
+      self:set_active_mode(mode_name)
+    end
+    local mode = self:get_mode(mode_name)
+    local history = self:get_history(mode)
+    if history == nil then
+      self:get_mode(mode_name)[callback_name]()
+    else
+      self.history = self:get_mode(mode_name)[callback_name](history)
+    end
+    if settings.open_fold_on_jump then
+      vim.cmd 'silent! norm! zv'
+    end
+    if settings.center_line_on_jump then
+      vim.cmd 'silent! norm! zz'
+    end
   end
-  function GN:prev(type_name)
-    self:get_type(type_name).prev_callback()
+  function GN:prev(mode_name)
+    self:jump(mode_name, "prev_callback")
   end
-  function GN:set_mode(type_name)
-    self:get_type(type_name)
+  function GN:next(mode_name)
+    self:jump(mode_name, "next_callback")
   end
   function GN:reset_mode()
-    self:set_mode(self.default_mode)
+    self:set_active_mode(self.default_mode)
   end
 
   -- keybinds
@@ -91,7 +119,7 @@ M.setup = function (user_settings)
 end
 
 M.mode = function ()
-  return GN.active_type
+  return GN.active_mode
 end
 
 M.reset_mode = function()
